@@ -5,7 +5,7 @@ RL 训练代码，基于gymnasium + pytorch，训练`CartPole-v1`和`InvertedPen
 - [x] REINFORCE
   - [x] CartPole-v1
   - [x] InvertedPendulum-v5
-- [x] DQN
+- [x] DQN&DDQN
   - [x] CartPole-v1
 - [ ] A2C
 - [ ] A3C

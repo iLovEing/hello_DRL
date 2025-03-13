@@ -14,7 +14,7 @@ from collections import deque
 from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
 
-ENV_NAME = 'CartPole-v1'
+ENV_NAME = 'CartPole-v1-DDQN'
 LOG_FILE = f'{ENV_NAME}.txt'
 SEED = 1111
 EPS_START = 0.9
@@ -152,10 +152,13 @@ class DQN:
 
         # Compute the expected Q values
         non_final_mask = torch.tensor(list(map(lambda x: x is not None, next_states)), dtype=torch.bool)
-        non_final_next_states = torch.stack(list(filter(lambda x: x is not None, next_states)))
+        non_final_next_states = torch.stack(list(filter(lambda x: x is not None, next_states))).to(self.policy_agent.device)
         next_qsa = torch.zeros(self.batch_size, device=self.target_agent.device)
-        next_qsa[non_final_mask] = self.target_agent.act(non_final_next_states)[1]
-        expected_qsa = (next_qsa * self.gamma).unsqueeze(-1) + reward_batch
+        with torch.no_grad():
+            _q_value = self.policy_agent.Q_net(non_final_next_states)
+            _q = torch.argmax(_q_value, dim=-1).to(self.target_agent.device)
+            next_qsa[non_final_mask] = self.target_agent.Q_net(non_final_next_states).gather(1, _q.unsqueeze(-1)).squeeze(-1)
+            expected_qsa = (next_qsa * self.gamma).unsqueeze(-1) + reward_batch
 
         loss = self.loss_f(output_qsa, expected_qsa)
         self.optimizer.zero_grad()
@@ -176,7 +179,7 @@ def set_seed(seed):
 def train():
     set_seed(SEED)
 
-    env = gym.make(ENV_NAME)
+    env = gym.make(ENV_NAME[:-5])
     env = gym.wrappers.RecordEpisodeStatistics(env, 50)
     agent = Agent()
     algo = DQN(agent, memory_size=replay_buffer_len, gamma=discount_factor,
@@ -234,7 +237,7 @@ def train():
 def save_video(ckpt=None):
     num_eval_episodes = 4
 
-    env = gym.make(ENV_NAME, render_mode="rgb_array")  # replace with your environment
+    env = gym.make(ENV_NAME[:-5], render_mode="rgb_array")  # replace with your environment
     env = RecordVideo(env, video_folder="vedio", name_prefix=ENV_NAME,
                       episode_trigger=lambda x: True)
     env = RecordEpisodeStatistics(env, buffer_length=num_eval_episodes)
@@ -256,7 +259,7 @@ def save_video(ckpt=None):
     print(f'Episode lengths: {env.length_queue}')
 
 def play_video(ckpt=None):
-    env = gym.make(ENV_NAME, render_mode="human")
+    env = gym.make(ENV_NAME[:-5], render_mode="human")
     agent = Agent(ckpt_path=ckpt)
 
     observation, info = env.reset()
@@ -279,5 +282,5 @@ def test():
 if __name__ == '__main__':
     logger.add(os.path.join('train_log', f'{LOG_FILE}'),
                format="{time:HH:mm:ss.SSS} | {file}:{line} | {level} | {message}")
-    # train()
-    test()
+    train()
+    # test()
