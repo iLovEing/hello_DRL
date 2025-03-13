@@ -13,7 +13,7 @@ from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
 
 ENV_NAME = 'CartPole-v1'
-LOG_FILE = f'{ENV_NAME}.log'
+LOG_FILE = f'{ENV_NAME}.txt'
 SEED = 1111
 
 num_episodes = 10000
@@ -162,6 +162,9 @@ def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
 
 
 def train():
@@ -181,7 +184,7 @@ def train():
     cumulative_rewards = []
     avg_rewards = []
     for episode in tqdm(range(num_episodes)):
-        obs, info = env.reset(seed=SEED)
+        obs, info = env.reset()
 
         done = False
         while not done:

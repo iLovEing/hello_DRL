@@ -15,7 +15,7 @@ from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
 
 ENV_NAME = 'CartPole-v1'
-LOG_FILE = f'{ENV_NAME}.log'
+LOG_FILE = f'{ENV_NAME}.txt'
 SEED = 1111
 EPS_START = 0.9
 EPS_END = 0.05
@@ -103,6 +103,7 @@ class DQN:
         self.tau = tau
         self.batch_size = batch_size
         self.loss_f = loss_f
+        self.act_decay_step = 0
 
         self.replay_buffer = deque(maxlen=memory_size)
 
@@ -116,6 +117,21 @@ class DQN:
     def refresh_target_agent(self, tau=1.0):
         self.target_agent.load(state_dict=self.policy_agent.Q_net.state_dict(), tau=tau)
 
+    def select_action(self, env, state):
+        sample = random.random()
+        eps_threshold = EPS_END + (EPS_START - EPS_END) * \
+                        math.exp(-1. * self.act_decay_step / EPS_DECAY)
+        self.act_decay_step += 1
+        if sample > eps_threshold:
+            with torch.no_grad():
+                # t.max(1) will return the largest column value of each row.
+                # second column on max result is index of where max element was
+                # found, so we pick action with the larger expected reward.
+                action, _ = self.policy_agent.act(state)
+                return action.item()
+        else:
+            return env.action_space.sample()
+
     def update(self, obs, action, reward, next_obs):
         self.replay_buffer.append({
             'obs': obs,
@@ -127,20 +143,16 @@ class DQN:
             return
 
         batch = random.sample(self.replay_buffer, self.batch_size)
-        state = np.array([x['obs'] for x in batch])
-        actions = np.array([x['action'] for x in batch])
-        rewards = np.array([x['reward'] for x in batch])
+        state_batch = torch.stack([x['obs'] for x in batch]).to(self.policy_agent.device)
+        action_batch = torch.stack([x['action'] for x in batch]).to(self.policy_agent.device)
+        reward_batch = torch.stack([x['reward'] for x in batch]).to(self.target_agent.device)
         next_states = [x['next_obs'] for x in batch]
-
-        state_batch = torch.tensor(state, device=self.policy_agent.device, dtype=torch.float)
-        action_batch = torch.tensor(actions, device=self.policy_agent.device, dtype=torch.long)
-        reward_batch = torch.tensor(rewards, device=self.target_agent.device, dtype=torch.float)
 
         output_qsa = self.policy_agent.Q_net(state_batch).gather(1, action_batch)
 
         # Compute the expected Q values
         non_final_mask = torch.tensor(list(map(lambda x: x is not None, next_states)), dtype=torch.bool)
-        non_final_next_states = torch.tensor(np.array(list(filter(lambda x: x is not None, next_states))))
+        non_final_next_states = torch.stack(list(filter(lambda x: x is not None, next_states)))
         next_sa = torch.zeros(self.batch_size, device=self.target_agent.device)
         next_sa[non_final_mask] = self.target_agent.act(non_final_next_states)[1]
         expected_qsa = (next_sa * self.gamma).unsqueeze(-1) + reward_batch
@@ -152,24 +164,6 @@ class DQN:
         self.optimizer.step()
 
         self.refresh_target_agent(tau=self.tau)
-
-
-action_step = 0
-def select_action(env, obs, agent):
-    global action_step
-    sample = random.random()
-    eps_threshold = EPS_END + (EPS_START - EPS_END) * \
-                    math.exp(-1. * action_step / EPS_DECAY)
-    action_step += 1
-    if sample > eps_threshold:
-        with torch.no_grad():
-            # t.max(1) will return the largest column value of each row.
-            # second column on max result is index of where max element was
-            # found, so we pick action with the larger expected reward.
-            action, _ = agent.act(obs)
-            return action.item()
-    else:
-        return env.action_space.sample()
 
 def set_seed(seed):
     random.seed(seed)
@@ -201,13 +195,13 @@ def train():
 
         done = False
         while not done:
-            action = select_action(env, obs, agent)
+            action = algo.select_action(env, obs)
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
-            algo.update(obs,
-                        np.array([action], dtype=np.long),
-                        np.array([reward], dtype=np.float32),
-                        None if terminated else next_obs,
+            algo.update(torch.tensor(obs, dtype=torch.float32),
+                        torch.tensor([action], dtype=torch.long),
+                        torch.tensor([reward], dtype=torch.float32),
+                        None if terminated else torch.tensor(next_obs, dtype=torch.float32),
                         )
             obs = next_obs
 
@@ -278,9 +272,9 @@ def play_video(ckpt=None):
 def test():
     if False:
     # if True:
-        play_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_217_reward_476.pth'))
+        play_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_107_reward_478.pth'))
     else:
-        save_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_217_reward_476.pth'))
+        save_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_107_reward_478.pth'))
 
 if __name__ == '__main__':
     logger.add(os.path.join('train_log', f'{LOG_FILE}'),
