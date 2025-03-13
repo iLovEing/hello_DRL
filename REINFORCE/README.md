@@ -32,3 +32,8 @@ $loss = - \ln \pi (a_{t}\mid s_{t}, \theta )q_{\pi }(a_{t}, s_{t}) $
 
 
 ## 训练结果
+- CartPole-v1  
+![CartPole-v1 train reward](https://github.com/iLovEing/hello_RL/blob/main/REINFORCE/train_log/CartPole-v1_reward.png)
+
+- InvertedPendulum-v5  
+![InvertedPendulum-v5 train reward](https://github.com/iLovEing/hello_RL/blob/main/REINFORCE/train_log/InvertedPendulum-v5_reward.png)
