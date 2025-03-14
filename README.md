@@ -1,6 +1,6 @@
 # hello_RL
 
-RL 训练代码，基于gymnasium + pytorch，训练`CartPole-v1`和`InvertedPendulum-v5`两个case。  
+RL spinning up code，基于gymnasium + pytorch，训练`CartPole-v1`和`InvertedPendulum-v5`两个case。  
 实现列表:
 - [x] REINFORCE
   - [x] CartPole-v1
@@ -17,3 +17,7 @@ RL 训练代码，基于gymnasium + pytorch，训练`CartPole-v1`和`InvertedPen
 一些参考网站
 - [openai DRL spingup](https://spinningup.openai.com/en/latest/)
 - [gymnasium 中文文档](https://gymnasium.org.cn/)
+
+---
+
+todo: case说明
