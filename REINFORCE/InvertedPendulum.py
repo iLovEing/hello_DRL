@@ -44,16 +44,13 @@ class PolicyNet(nn.Module):
         return mean, std
 
 class Agent:
-    def __init__(self, load_ckpt=None):
+    def __init__(self, ckpt_path=None):
         self.policy = PolicyNet(4, 2)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        if load_ckpt is not None:
-            self.load(load_ckpt)
-
+        self.load(ckpt_path)
         self.policy = self.policy.to(self.device)
-        self.policy.eval()
-        self.training = False
+        self.train_mode(False)
 
     def act(self, state: np.array):
         if self.training:
@@ -76,7 +73,8 @@ class Agent:
         torch.save(self.policy.state_dict(), path)
 
     def load(self, path):
-        self.policy.load_state_dict(torch.load(path))
+        if path is not None:
+            self.policy.load_state_dict(torch.load(path, device=self.device))
 
     def train_mode(self, training=True):
         self.training = training
@@ -88,12 +86,16 @@ class Agent:
 
 class REINFORCE:
     def __init__(self, agent, gamma=0.99, lr=1e-4):
+        self.agent = agent
         self.gamma = gamma
-        agent.train_mode()
-        self.optimizer = torch.optim.Adam(agent.policy.parameters(), lr=lr)
+        self.agent.train_mode()
+        self.optimizer = torch.optim.Adam(self.agent.policy.parameters(), lr=lr)
 
         self.log_probs = []
         self.rewards = []
+
+    def select_action(self, obs, env=None):
+        return self.agent.act(obs)
 
     def update(self, log_prob, reward, done):
         if not done:
@@ -194,7 +196,7 @@ def train():
 
         done = False
         while not done:
-            action, log_prob = agent.act(obs)
+            action, log_prob = algo.select_action(obs)
             obs, reward, terminated, truncated, info = env.step(action.detach().cpu().numpy())
             done = terminated or truncated
             algo.update(log_prob, reward, done)

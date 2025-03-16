@@ -51,10 +51,8 @@ class Agent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.load(ckpt_path=ckpt_path)
-
         self.Q_net = self.Q_net.to(self.device)
-        self.Q_net.eval()
-        self.training = False
+        self.train_mode(False)
 
     def act(self, state):
         assert isinstance(state, np.ndarray) or isinstance(state, torch.Tensor)

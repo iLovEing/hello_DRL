@@ -51,10 +51,8 @@ class Agent:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.load(ckpt_path=ckpt_path)
-
         self.Q_net = self.Q_net.to(self.device)
-        self.Q_net.eval()
-        self.training = False
+        self.train_mode(False)
 
     def act(self, state):
         assert isinstance(state, np.ndarray) or isinstance(state, torch.Tensor)
@@ -96,7 +94,7 @@ class Agent:
             self.Q_net.eval()
 
 class DQN:
-    def __init__(self, agent, memory_size=1000, gamma=0.99, tau=0.005,
+    def __init__(self, agent, memory_size=10000, gamma=0.99, tau=0.005,
                  batch_size=128, lr=1e-4, loss_f=nn.SmoothL1Loss()):
         self.memory_size = memory_size
         self.gamma = gamma

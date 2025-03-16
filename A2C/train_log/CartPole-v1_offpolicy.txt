@@ -1,0 +1,5 @@
+10:47:28.514 | CartPole_offpolicy.py:207 | INFO | Training agent to play CartPole-v1_offpolicy by REINFORCE.
+10:47:28.515 | CartPole_offpolicy.py:208 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+10:47:37.810 | CartPole_offpolicy.py:236 | INFO | Episode:50, Average Reward:89
+10:48:12.318 | CartPole_offpolicy.py:236 | INFO | Episode:100, Average Reward:298
+10:48:53.008 | CartPole_offpolicy.py:239 | INFO | training finished at episode 135, average reward: 478
