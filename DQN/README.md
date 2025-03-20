@@ -1,7 +1,7 @@
 # DQN
 
 ## 算法原理
-`DQN`属于value based算法，最终目标是用神经网络估算action value， 实际上是求解贝尔曼最优方程：  
+`DQN`属于value based算法，最终目标是用神经网络估算action value，最终通过选取最大的action value指导agent行动。DQN实际上是求解贝尔曼最优方程：  
 1. 设估计Q value的函数为 $\hat{q} (s, a, w)$, 其中 $w$为参数，value based方法的优化目标为:   
 $J(\omega ) = E[{(R + \gamma max_{a\in A(S\prime )}\hat{q}(S\prime, a, w) - \hat{q}(S, a, w))}^{2}]$  
 这里，括号中前两项的和为target Q value，是神经网络的拟合目标，最后一项为eval Q value(或policy Q valu).  
