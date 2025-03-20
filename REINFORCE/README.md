@@ -1,7 +1,7 @@
 # REINFORCE
 
 ## 算法原理
-`REINFORCE`属于policy gradient类算法：  
+`REINFORCE`属于policy gradient类算法， 其目标是直接训练actor网络指导agent行动，网络输入是state，输出为action或其分布：  
 1. 策略梯度  
 $\nabla_{\theta }J(\theta ) = E_{S\sim \eta , a\sim \pi } [\nabla_{\theta } \ln \pi (A\mid S, \theta )q_{\pi }(S, A) ]$  
 2. 使用梯度上升方法更新 $\theta $  
