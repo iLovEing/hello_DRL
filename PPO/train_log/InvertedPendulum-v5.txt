@@ -1,0 +1,8 @@
+12:50:36.158 | InvertedPendulum.py:270 | INFO | Training agent to play InvertedPendulum-v5 by REINFORCE.
+12:50:36.158 | InvertedPendulum.py:271 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:50:37.038 | InvertedPendulum.py:305 | INFO | Episode:50, Average Reward:10
+12:50:38.446 | InvertedPendulum.py:305 | INFO | Episode:100, Average Reward:23
+12:50:42.195 | InvertedPendulum.py:305 | INFO | Episode:150, Average Reward:61
+12:50:51.381 | InvertedPendulum.py:305 | INFO | Episode:200, Average Reward:159
+12:51:27.688 | InvertedPendulum.py:305 | INFO | Episode:250, Average Reward:731
+12:51:44.323 | InvertedPendulum.py:308 | INFO | training finished at episode 267, average reward: 962

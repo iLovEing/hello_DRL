@@ -143,7 +143,7 @@ class A2C:
         self.replay_buffer.append({
             'obs': obs,
             'action': action,
-            'prob': prob.detach(),
+            'prob': prob,
             'reward': reward,
             'next_obs': next_obs
         })
@@ -160,11 +160,11 @@ class A2C:
         target_prob_batch = self.agent.actor(state_batch).gather(1, action_batch)
         reject_sampleing_factor = target_prob_batch.detach() / policy_prob_batch
 
-        state_values = self.agent.critic(state_batch)
+        state_values = self.agent.criticize(state_batch)
         non_final_mask = torch.tensor(list(map(lambda x: x is not None, next_states)), dtype=torch.bool)
         non_final_next_states = torch.stack(list(filter(lambda x: x is not None, next_states))).to(self.agent.device)
         next_state_values = torch.zeros(state_values.shape, device=self.agent.device)
-        next_state_values[non_final_mask, :] = self.agent.critic(non_final_next_states).detach()
+        next_state_values[non_final_mask, :] = self.agent.criticize(non_final_next_states).detach()
         target_state_values = next_state_values * self.gamma + reward_batch
 
         _factor = torch.sqrt(reject_sampleing_factor)
@@ -222,7 +222,7 @@ def train():
             done = terminated or truncated
             algo.update(torch.tensor(obs, dtype=torch.float32),
                         action,
-                        prob,
+                        prob.detach(),
                         torch.tensor([reward], dtype=torch.float32),
                         None if terminated else torch.tensor(next_obs, dtype=torch.float32),
                         done)
