@@ -41,8 +41,8 @@ $\nabla_{\theta }J(\theta ) = E_{S\sim \eta , a\sim \pi } [\nabla_{\theta } \ln 
 
 ## 训练结果
 - CartPole-v1  
-![CartPole-v1 train reward](https://github.com/iLovEing/hello_DRL/blob/main/3.A2C/train_log/CartPole-v1_reward.png)
+![CartPole-v1 train reward](https://github.com/iLovEing/hello_DRL/blob/main/3.A2C/train_log/CartPole-v1_A2C_reward.png)
 
 - CartPole-v1_off-policy
-![CartPole-v1_off-policy train reward](https://github.com/iLovEing/hello_DRL/blob/main/3.A2C/train_log/CartPole-v1_offpolicy_reward.png)
+![CartPole-v1_off-policy train reward](https://github.com/iLovEing/hello_DRL/blob/main/3.A2C/train_log/CartPole-v1_A2C_off-policy_reward.png)
 
