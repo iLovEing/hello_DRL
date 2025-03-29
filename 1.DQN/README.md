@@ -34,7 +34,7 @@ $\omega_{t+1} = \omega_{t} - \alpha [-2(r+\gamma max_{a\in A(s\prime )}\hat{q}(s
 
 ## 训练结果
 - CartPole-v1  
-![CartPole-v1 train reward](https://github.com/iLovEing/hello_RL/blob/main/DQN/train_log/CartPole-v1_reward.png)
+![CartPole-v1 train reward](https://github.com/iLovEing/hello_DRL/blob/main/1.DQN/train_log/CartPole-v1_DQN_reward.png)
 
 - CartPole-v1_DDQN
-![CartPole-v1_DDQN train reward](https://github.com/iLovEing/hello_RL/blob/main/DQN/train_log/CartPole-v1-DDQN_reward.png)
+![CartPole-v1_DDQN train reward](https://github.com/iLovEing/hello_DRL/blob/main/1.DQN/train_log/CartPole-v1_DDQN_reward.png)
