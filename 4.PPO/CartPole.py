@@ -14,7 +14,11 @@ from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
 
 ENV_NAME = 'CartPole-v1'
-LOG_FILE = f'{ENV_NAME}.txt'
+ALGO_NAME = 'PPO'
+LOG_FILE = f'{ENV_NAME}_{ALGO_NAME}.txt'
+FIG_FILE = f'{ENV_NAME}_{ALGO_NAME}_reward.png'
+INFER_CKPT = 'CartPole-v1_PPO_episode_149_reward_478.pth'
+
 SEED = 1111
 
 num_episodes = 1000
@@ -213,7 +217,7 @@ def set_seed(seed):
 
 
 def train():
-    set_seed(SEED)
+    # set_seed(SEED)
 
     env = gym.make(ENV_NAME)
     env = gym.wrappers.RecordEpisodeStatistics(env, 50)
@@ -221,7 +225,7 @@ def train():
     algo = PPO(agent, gamma=discount_factor, lambda_=gae_lambda, ppo_epochs=PPO_epochs, clip_eps=clip_epsilon,
                lr=learning_rate)
 
-    logger.info(f'Training agent to play {ENV_NAME} by REINFORCE.')
+    logger.info(f'Training agent to play {ENV_NAME} by {ALGO_NAME}.')
     logger.info(f'num_episodes:{num_episodes}, '
                 f'discount_rate:{discount_factor}, '
                 f'learning_rate:{learning_rate}, '
@@ -259,7 +263,7 @@ def train():
 
         if avg_reward > stop_reward or episode + 1 == num_episodes:
             logger.info(f'training finished at episode {episode + 1}, average reward: {avg_reward}')
-            agent.save(os.path.join('ckpt', f'{ENV_NAME}_episode_{episode + 1}_reward_{avg_reward}.pth'))
+            agent.save(os.path.join('ckpt', f'{ENV_NAME}_{ALGO_NAME}_episode_{episode + 1}_reward_{avg_reward}.pth'))
             break
 
     data_df = pd.DataFrame({
@@ -274,14 +278,14 @@ def train():
                        data=pd.melt(data_df, ['episode']), palette=['blue', 'red'])
     plt.show()
     scatter_fig = fig.get_figure()
-    scatter_fig.savefig(os.path.join('train_log', f'{ENV_NAME}_reward.png'), dpi=400)
+    scatter_fig.savefig(os.path.join('train_log', FIG_FILE), dpi=400)
 
 
 def save_video(ckpt=None):
     num_eval_episodes = 4
 
     env = gym.make(ENV_NAME, render_mode="rgb_array")  # replace with your environment
-    env = RecordVideo(env, video_folder="vedio", name_prefix=ENV_NAME,
+    env = RecordVideo(env, video_folder="vedio", name_prefix=f'{ENV_NAME}_{ALGO_NAME}',
                       episode_trigger=lambda x: True)
     env = RecordEpisodeStatistics(env, buffer_length=num_eval_episodes)
     agent = Agent(actor_ckpt=ckpt)
@@ -318,9 +322,9 @@ def play_video(ckpt=None):
 def test():
     if False:
     # if True:
-        play_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_198_reward_478.pth'))
+        play_video(ckpt=os.path.join('ckpt', INFER_CKPT))
     else:
-        save_video(ckpt=os.path.join('ckpt', 'CartPole-v1_episode_198_reward_478.pth'))
+        save_video(ckpt=os.path.join('ckpt', INFER_CKPT))
 
 if __name__ == '__main__':
     logger.add(os.path.join('train_log', f'{LOG_FILE}'),

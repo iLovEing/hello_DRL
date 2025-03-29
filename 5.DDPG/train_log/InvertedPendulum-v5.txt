@@ -1,13 +1,11 @@
-10:50:10.402 | InvertedPendulum.py:238 | INFO | Training agent to play InvertedPendulum-v5 by DDPG.
-10:50:10.402 | InvertedPendulum.py:239 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
-10:50:10.805 | InvertedPendulum.py:270 | INFO | Episode:50, Average Reward:3
-10:50:11.184 | InvertedPendulum.py:270 | INFO | Episode:100, Average Reward:2
-10:50:11.809 | InvertedPendulum.py:270 | INFO | Episode:150, Average Reward:4
-10:50:12.826 | InvertedPendulum.py:270 | INFO | Episode:200, Average Reward:7
-10:50:18.157 | InvertedPendulum.py:270 | INFO | Episode:250, Average Reward:40
-10:50:27.432 | InvertedPendulum.py:270 | INFO | Episode:300, Average Reward:67
-10:50:38.281 | InvertedPendulum.py:270 | INFO | Episode:350, Average Reward:77
-10:50:49.635 | InvertedPendulum.py:270 | INFO | Episode:400, Average Reward:81
-10:51:13.025 | InvertedPendulum.py:270 | INFO | Episode:450, Average Reward:137
-10:51:39.388 | InvertedPendulum.py:270 | INFO | Episode:500, Average Reward:146
-10:54:45.108 | InvertedPendulum.py:273 | INFO | training finished at episode 548, average reward: 965
+12:41:29.654 | InvertedPendulum.py:241 | INFO | Training agent to play InvertedPendulum-v5 by DDPG.
+12:41:29.654 | InvertedPendulum.py:242 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:41:43.466 | InvertedPendulum.py:241 | INFO | Training agent to play InvertedPendulum-v5 by DDPG.
+12:41:43.466 | InvertedPendulum.py:242 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:41:43.936 | InvertedPendulum.py:273 | INFO | Episode:50, Average Reward:6
+12:41:45.703 | InvertedPendulum.py:273 | INFO | Episode:100, Average Reward:20
+12:41:54.644 | InvertedPendulum.py:273 | INFO | Episode:150, Average Reward:104
+12:42:04.368 | InvertedPendulum.py:273 | INFO | Episode:200, Average Reward:110
+12:42:18.756 | InvertedPendulum.py:273 | INFO | Episode:250, Average Reward:162
+12:42:59.091 | InvertedPendulum.py:273 | INFO | Episode:300, Average Reward:449
+12:44:16.685 | InvertedPendulum.py:276 | INFO | training finished at episode 342, average reward: 954

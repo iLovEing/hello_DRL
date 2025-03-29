@@ -1,5 +1,0 @@
-20:05:20.738 | CartPole.py:185 | INFO | Training agent to play CartPole-v1 by REINFORCE.
-20:05:20.738 | CartPole.py:186 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0001, seed:1111
-20:05:24.216 | CartPole.py:213 | INFO | Episode:50, Average Reward:42
-20:06:05.412 | CartPole.py:213 | INFO | Episode:100, Average Reward:417
-20:06:12.452 | CartPole.py:216 | INFO | training finished at episode 107, average reward: 478

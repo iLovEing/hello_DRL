@@ -12,9 +12,12 @@ from loguru import logger
 from collections import namedtuple, deque
 from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
-
 ENV_NAME = 'InvertedPendulum-v5'
+ALGO_NAME = 'DDPG'
 LOG_FILE = f'{ENV_NAME}.txt'
+FIG_FILE = f'{ENV_NAME}_{ALGO_NAME}_reward.png'
+INFER_CKPT = 'InvertedPendulum-v5_DDPG_episode_342_reward_954.pth'
+
 SEED = 1111
 
 # global parameters
@@ -42,13 +45,11 @@ class ActorNet(nn.Module):
         self.action_bound_bias = action_bound_bias
 
         self.fc = nn.Sequential(
-            nn.Linear(n_states, 16),
-            nn.Tanh(),
-            nn.Linear(16, 32),
-            nn.Tanh(),
-            nn.Linear(32, 16),
-            nn.Tanh(),
-            nn.Linear(16, n_actions),
+            nn.Linear(n_states, 64),
+            nn.ReLU(),
+            nn.Linear(64, 64),
+            nn.ReLU(),  # trick, use RelU instead of Tanh, avoid gradient vanishing
+            nn.Linear(64, n_actions),
             nn.Tanh(),  # fix action in [-1, 1]
         )
 
@@ -237,7 +238,7 @@ def train():
     algo = DDPG(agent, gamma=g_discount_factor, memory_size=g_replay_buffer_size, tau=g_target_update_tau,
                 lr=g_learning_rate, batch_size=g_batch_size, gradient_clip=g_gradient_clip)
 
-    logger.info(f'Training agent to play {ENV_NAME} by REINFORCE.')
+    logger.info(f'Training agent to play {ENV_NAME} by {ALGO_NAME}.')
     logger.info(f'num_episodes:{g_num_episodes}, '
                 f'discount_rate:{g_discount_factor}, '
                 f'learning_rate:{g_learning_rate}, '
@@ -273,7 +274,7 @@ def train():
 
         if avg_reward > g_stop_reward or episode + 1 == g_num_episodes:
             logger.info(f'training finished at episode {episode + 1}, average reward: {avg_reward}')
-            agent.save(os.path.join('ckpt', f'{ENV_NAME}_episode_{episode + 1}_reward_{avg_reward}.pth'))
+            agent.save(os.path.join('ckpt', f'{ENV_NAME}_{ALGO_NAME}_episode_{episode + 1}_reward_{avg_reward}.pth'))
             break
 
     data_df = pd.DataFrame({
@@ -288,14 +289,14 @@ def train():
                        data=pd.melt(data_df, ['episode']), palette=['blue', 'red'])
     plt.show()
     scatter_fig = fig.get_figure()
-    scatter_fig.savefig(os.path.join('train_log', f'{ENV_NAME}_reward.png'), dpi=400)
+    scatter_fig.savefig(os.path.join('train_log', FIG_FILE), dpi=400)
 
 
 def save_video(ckpt=None):
     num_eval_episodes = 4
 
     env = gym.make(ENV_NAME, render_mode="rgb_array")  # replace with your environment
-    env = RecordVideo(env, video_folder="vedio", name_prefix=ENV_NAME,
+    env = RecordVideo(env, video_folder="vedio", name_prefix=f'{ENV_NAME}_{ALGO_NAME}',
                       episode_trigger=lambda x: True)
     env = RecordEpisodeStatistics(env, buffer_length=num_eval_episodes)
     agent = Agent(actor_ckpt=ckpt)
@@ -332,9 +333,9 @@ def play_video(ckpt=None):
 def test():
     if False:
     # if True:
-        play_video(ckpt=os.path.join('ckpt', 'InvertedPendulum-v5_episode_415_reward_951.pth'))
+        play_video(ckpt=os.path.join('ckpt', INFER_CKPT))
     else:
-        save_video(ckpt=os.path.join('ckpt', 'InvertedPendulum-v5_episode_415_reward_951.pth'))
+        save_video(ckpt=os.path.join('ckpt', INFER_CKPT))
 
 if __name__ == '__main__':
     logger.add(os.path.join('train_log', f'{LOG_FILE}'),

@@ -1,0 +1,9 @@
+11:32:06.233 | CartPole_DDQN.py:190 | INFO | Training agent to play CartPole-v1 by DDQN.
+11:32:06.233 | CartPole_DDQN.py:191 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0001, seed:1111
+11:32:07.455 | CartPole_DDQN.py:218 | INFO | Episode:50, Average Reward:23
+11:32:11.652 | CartPole_DDQN.py:218 | INFO | Episode:100, Average Reward:67
+11:32:25.195 | CartPole_DDQN.py:218 | INFO | Episode:150, Average Reward:222
+11:32:36.631 | CartPole_DDQN.py:218 | INFO | Episode:200, Average Reward:185
+11:32:54.131 | CartPole_DDQN.py:218 | INFO | Episode:250, Average Reward:270
+11:33:13.964 | CartPole_DDQN.py:218 | INFO | Episode:300, Average Reward:300
+11:33:42.724 | CartPole_DDQN.py:221 | INFO | training finished at episode 343, average reward: 478

@@ -1,0 +1,8 @@
+12:05:59.770 | CartPole.py:185 | INFO | Training agent to play CartPole-v1 by A2C.
+12:05:59.770 | CartPole.py:186 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:06:00.433 | CartPole.py:214 | INFO | Episode:50, Average Reward:19
+12:06:01.514 | CartPole.py:214 | INFO | Episode:100, Average Reward:32
+12:06:04.171 | CartPole.py:214 | INFO | Episode:150, Average Reward:79
+12:06:10.388 | CartPole.py:214 | INFO | Episode:200, Average Reward:187
+12:06:27.115 | CartPole.py:214 | INFO | Episode:250, Average Reward:448
+12:06:32.921 | CartPole.py:217 | INFO | training finished at episode 266, average reward: 477

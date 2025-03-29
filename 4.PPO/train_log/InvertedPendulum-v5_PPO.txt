@@ -1,0 +1,7 @@
+12:17:27.808 | InvertedPendulum.py:274 | INFO | Training agent to play InvertedPendulum-v5 by PPO.
+12:17:27.808 | InvertedPendulum.py:275 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:17:28.188 | InvertedPendulum.py:309 | INFO | Episode:50, Average Reward:11
+12:17:29.428 | InvertedPendulum.py:309 | INFO | Episode:100, Average Reward:33
+12:17:32.720 | InvertedPendulum.py:309 | INFO | Episode:150, Average Reward:100
+12:17:43.272 | InvertedPendulum.py:309 | INFO | Episode:200, Average Reward:349
+12:18:03.053 | InvertedPendulum.py:312 | INFO | training finished at episode 239, average reward: 951

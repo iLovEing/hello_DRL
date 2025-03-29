@@ -1,0 +1,5 @@
+12:15:30.633 | CartPole.py:228 | INFO | Training agent to play CartPole-v1 by PPO.
+12:15:30.633 | CartPole.py:229 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:15:33.152 | CartPole.py:262 | INFO | Episode:50, Average Reward:182
+12:15:38.761 | CartPole.py:262 | INFO | Episode:100, Average Reward:465
+12:15:44.473 | CartPole.py:265 | INFO | training finished at episode 149, average reward: 478

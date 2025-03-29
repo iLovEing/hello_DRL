@@ -1,0 +1,5 @@
+12:10:41.182 | CartPole_offpolicy.py:211 | INFO | Training agent to play CartPole-v1 by A2C_off-policy.
+12:10:41.182 | CartPole_offpolicy.py:212 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+12:10:45.581 | CartPole_offpolicy.py:240 | INFO | Episode:50, Average Reward:77
+12:11:06.307 | CartPole_offpolicy.py:240 | INFO | Episode:100, Average Reward:403
+12:11:18.174 | CartPole_offpolicy.py:243 | INFO | training finished at episode 123, average reward: 478

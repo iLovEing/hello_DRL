@@ -1,7 +1,0 @@
-21:24:13.908 | CartPole_DDQN.py:188 | INFO | Training agent to play CartPole-v1-DDQN by REINFORCE.
-21:24:13.908 | CartPole_DDQN.py:189 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0001, seed:1111
-21:24:16.683 | CartPole_DDQN.py:216 | INFO | Episode:50, Average Reward:32
-21:24:34.886 | CartPole_DDQN.py:216 | INFO | Episode:100, Average Reward:149
-21:25:45.576 | CartPole_DDQN.py:216 | INFO | Episode:150, Average Reward:272
-21:27:28.060 | CartPole_DDQN.py:216 | INFO | Episode:200, Average Reward:406
-21:29:14.117 | CartPole_DDQN.py:219 | INFO | training finished at episode 240, average reward: 476
