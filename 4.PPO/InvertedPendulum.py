@@ -4,6 +4,7 @@ import random
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from tensorstore import dtype
 from tqdm import tqdm
 import numpy as np
 import torch.nn as nn
@@ -18,7 +19,7 @@ ENV_NAME = 'InvertedPendulum-v5'
 ALGO_NAME = 'PPO'
 LOG_FILE = f'{ENV_NAME}_{ALGO_NAME}.txt'
 FIG_FILE = f'{ENV_NAME}_{ALGO_NAME}_reward.png'
-INFER_CKPT = 'InvertedPendulum-v5_PPO_episode_239_reward_951.pth'
+INFER_CKPT = 'InvertedPendulum-v5_PPO_episode_460_reward_956.pth'
 
 SEED = 1111
 
@@ -32,25 +33,39 @@ g_stop_reward = 950
 g_ppo_clip_epsilon = 0.2
 
 # tricks
-g_entropy_coef = 0.01 # trick 1, policy entropy, set 0. to disable
-g_batch_size = 128  # trick 2, use batch data instead of total episode data, set 0 to disable
-g_gradient_clip = 0.5  # trick 3, gradient clip, set 0. to disable
-g_advantage_norm = True  # trick 4,  advantage normalization
-g_state_norm = True
+# trick 1, policy entropy, set 0. to disable
+g_entropy_coef = 0.01
+# trick 2, use batch data instead of total episode data, set 0 to disable
+# attention, if your memory size is much larger than batch size, do not simply random sample batch from memory
+# instead, shuffle memory and load batch from memory as order. make sure to use experience fully and on average.
+g_batch_size = 128
+# trick 3, gradient clip, set 0. to disable
+g_gradient_clip = 0.5
+# trick 4,  advantage normalization in mini-batch
+g_advantage_norm = True
+# trick 5, orthogonal init
+g_use_orthogonal_init = False  # bad in this case
+# trick 6, adam eps 1e-8 or 1e-7
+g_adam_eps = 1e-8
+# trick 7, lr decay
+g_lr_decay = True
 # other tricks
 # 1. Beta distribution instead of Guassain distribution
-# 2. Orthogonal Initialization
+# 2. state moving average normalization
 
 Transition = namedtuple('Transition',
                         ('state', 'action', 'action_log_prob', 'reward', 'next_state', 'terminated', 'truncated'))
 
 
-class ActorNet(nn.Module):
-    def  __init__(self, n_states, n_actions, state_batchnorm=False):
-        super().__init__()
+def orthogonal_init(module):
+    if isinstance(module, nn.Linear) or isinstance(module, nn.Conv2d):
+        nn.init.orthogonal_(module.weight, gain=0.01)
+        nn.init.constant_(module.bias, 0)
 
-        self.state_batchnorm = state_batchnorm
-        self.bn = nn.BatchNorm1d(n_states)
+
+class ActorNet(nn.Module):
+    def  __init__(self, n_states, n_actions, use_orthogonal_init=False):
+        super().__init__()
 
         self.fc = nn.Sequential(
             nn.Linear(n_states, 16),
@@ -64,20 +79,18 @@ class ActorNet(nn.Module):
 
         self.softmax = nn.Softmax(dim=-1)
 
+        if use_orthogonal_init:
+            self.apply(orthogonal_init)
+
     def forward(self, state):
-        if self.state_batchnorm:
-            state = self.bn(state)
         output = self.fc(state)
         mean, std = torch.split(output, 1, dim=-1)
         std = torch.log(1 + torch.exp(std))
         return mean, std
 
 class CriticNet(nn.Module):
-    def __init__(self, n_states, state_batchnorm=False):
+    def __init__(self, n_states, use_orthogonal_init=False):
         super().__init__()
-
-        self.state_batchnorm = state_batchnorm
-        self.bn = nn.BatchNorm1d(n_states)
 
         self.fc = nn.Sequential(
             nn.Linear(n_states, 128),
@@ -87,16 +100,17 @@ class CriticNet(nn.Module):
             nn.Linear(128, 1)
         )
 
+        if use_orthogonal_init:
+            self.apply(orthogonal_init)
+
     def forward(self, state):
-        if self.state_batchnorm:
-            state = self.bn(state)
         state_value = self.fc(state)
         return state_value
 
 class Agent:
-    def __init__(self, actor_ckpt=None, critic_ckpt=None, state_norm=False):
-        self.actor = ActorNet(4, 1, state_batchnorm=state_norm)
-        self.critic = CriticNet(4, state_batchnorm=state_norm)
+    def __init__(self, actor_ckpt=None, critic_ckpt=None, use_orthogonal_init=False):
+        self.actor = ActorNet(4, 1, use_orthogonal_init=use_orthogonal_init)
+        self.critic = CriticNet(4, use_orthogonal_init=use_orthogonal_init)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.actor = self.actor.to(self.device)
@@ -161,7 +175,7 @@ class Agent:
 
 class PPO:
     def __init__(self, agent: Agent, gamma=0.99, lambda_=0.95, ppo_epochs=100, ppo_clip_eps=0.2, entropy_coef=0.,
-                 lr=1e-4, batch_size=0, gradient_clip=0., adv_norm=False):
+                 lr=1e-4, batch_size=0, gradient_clip=0., adv_norm=False, adam_eps=1e-5, lr_decay=False):
         self.agent = agent
         self.gamma = gamma
         self.lambda_ = lambda_
@@ -172,10 +186,16 @@ class PPO:
         self.batch_size = batch_size
         self.gradient_clip = gradient_clip
         self.adv_norm = adv_norm
+        self.lr_decay = lr_decay
 
         self.agent.train_mode()
-        self.actor_optimizer = torch.optim.Adam(self.agent.actor.parameters(), lr=lr)
-        self.critic_optimizer = torch.optim.Adam(self.agent.critic.parameters(), lr=lr)
+        self.actor_optimizer = torch.optim.Adam(self.agent.actor.parameters(), lr=lr, eps=adam_eps)
+        self.critic_optimizer = torch.optim.Adam(self.agent.critic.parameters(), lr=lr, eps=adam_eps)
+        if self.lr_decay:
+            # self.actor_scheduler = torch.optim.lr_scheduler.StepLR(self.actor_optimizer, step_size=10, gamma=0.9)
+            # self.critic_scheduler = torch.optim.lr_scheduler.StepLR(self.critic_optimizer, step_size=10, gamma=0.9)
+            self.actor_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.actor_optimizer, gamma=0.99)
+            self.critic_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.critic_optimizer, gamma=0.99)
         self.critic_loss_f = nn.MSELoss()
 
         self.memory = []
@@ -195,7 +215,6 @@ class PPO:
                 gae[i] += gae[i + 1] * self.gamma * self.lambda_ * (1.0 - done_batch[i][0])
 
             target_state_values = gae + state_values
-            gae = ((gae - gae.mean()) / (gae.std() + 1e-5)) if self.adv_norm else gae
         return gae, target_state_values
 
     def update(self, transition: Transition, done):
@@ -213,17 +232,22 @@ class PPO:
         terminal_batch = torch.stack(batch.terminated).to(self.agent.device)
         truncated_batch = torch.stack(batch.truncated).to(self.agent.device)
 
-        for _ in range(self.ppo_epochs):
-            gae, target_state_values = self.estimate_gae(state_batch, reward_batch, next_state_batch,
-                                                         terminal_batch, truncated_batch)
-
+        gae, target_state_values = self.estimate_gae(state_batch, reward_batch, next_state_batch,
+                                                     terminal_batch, truncated_batch)
+        indices = torch.randperm(len(self.memory))
+        batch_size = self.batch_size if self.batch_size > 0 else len(self.memory)
+        for _ppo_epoch in range(self.ppo_epochs):
             # sample
-            _indices = torch.randperm(len(self.memory))[:(self.batch_size if self.batch_size > 0 else len(self.memory))]
+            id_of_indices = torch.Tensor(list(range(_ppo_epoch * batch_size, (_ppo_epoch + 1) * batch_size))).long()
+            id_of_indices = id_of_indices % len(self.memory)
+            _indices = indices[id_of_indices]
             _state_batch = state_batch[_indices, ...]
             _target_state_values = target_state_values[_indices, ...]
             _action_batch = action_batch[_indices, ...]
             _old_log_prob_batch = old_log_prob_batch[_indices, ...]
             _gae = gae[_indices, ...]
+
+            _gae = ((_gae - _gae.mean()) / (_gae.std() + 1e-5)) if self.adv_norm else _gae
 
             # critic
             _state_values = self.agent.criticize(_state_batch)
@@ -249,7 +273,9 @@ class PPO:
                 torch.nn.utils.clip_grad_norm_(self.agent.actor.parameters(), self.gradient_clip)
             self.actor_optimizer.step()
 
-
+        if self.lr_decay:
+            self.actor_scheduler.step()
+            self.critic_scheduler.step()
         self.memory.clear()
 
 def set_seed(seed):
@@ -266,10 +292,10 @@ def train():
 
     env = gym.make(ENV_NAME)
     env = gym.wrappers.RecordEpisodeStatistics(env, 50)
-    agent = Agent()
+    agent = Agent(use_orthogonal_init=g_use_orthogonal_init)
     algo = PPO(agent, gamma=g_discount_factor, lambda_=g_gae_lambda, ppo_epochs=g_PPO_epochs, ppo_clip_eps=g_ppo_clip_epsilon,
                entropy_coef=g_entropy_coef,lr=g_learning_rate, batch_size=g_batch_size, gradient_clip=g_gradient_clip,
-               adv_norm=g_advantage_norm)
+               adv_norm=g_advantage_norm, adam_eps=g_adam_eps, lr_decay=g_lr_decay)
 
     logger.info(f'Training agent to play {ENV_NAME} by {ALGO_NAME}.')
     logger.info(f'num_episodes:{g_num_episodes}, '

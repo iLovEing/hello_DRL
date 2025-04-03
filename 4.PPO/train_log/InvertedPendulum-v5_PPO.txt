@@ -1,7 +1,12 @@
-12:17:27.808 | InvertedPendulum.py:274 | INFO | Training agent to play InvertedPendulum-v5 by PPO.
-12:17:27.808 | InvertedPendulum.py:275 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
-12:17:28.188 | InvertedPendulum.py:309 | INFO | Episode:50, Average Reward:11
-12:17:29.428 | InvertedPendulum.py:309 | INFO | Episode:100, Average Reward:33
-12:17:32.720 | InvertedPendulum.py:309 | INFO | Episode:150, Average Reward:100
-12:17:43.272 | InvertedPendulum.py:309 | INFO | Episode:200, Average Reward:349
-12:18:03.053 | InvertedPendulum.py:312 | INFO | training finished at episode 239, average reward: 951
+06:55:00.023 | InvertedPendulum.py:300 | INFO | Training agent to play InvertedPendulum-v5 by PPO.
+06:55:00.023 | InvertedPendulum.py:301 | INFO | num_episodes:1000, discount_rate:0.99, learning_rate:0.0005, seed:1111
+06:55:00.221 | InvertedPendulum.py:335 | INFO | Episode:50, Average Reward:9
+06:55:00.561 | InvertedPendulum.py:335 | INFO | Episode:100, Average Reward:16
+06:55:01.504 | InvertedPendulum.py:335 | INFO | Episode:150, Average Reward:51
+06:55:03.429 | InvertedPendulum.py:335 | INFO | Episode:200, Average Reward:95
+06:55:05.670 | InvertedPendulum.py:335 | INFO | Episode:250, Average Reward:137
+06:55:08.825 | InvertedPendulum.py:335 | INFO | Episode:300, Average Reward:205
+06:55:13.909 | InvertedPendulum.py:335 | INFO | Episode:350, Average Reward:379
+06:55:22.815 | InvertedPendulum.py:335 | INFO | Episode:400, Average Reward:771
+06:55:33.147 | InvertedPendulum.py:335 | INFO | Episode:450, Average Reward:938
+06:55:35.272 | InvertedPendulum.py:338 | INFO | training finished at episode 460, average reward: 956
