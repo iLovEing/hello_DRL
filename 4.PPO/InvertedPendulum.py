@@ -19,7 +19,7 @@ ENV_NAME = 'InvertedPendulum-v5'
 ALGO_NAME = 'PPO'
 LOG_FILE = f'{ENV_NAME}_{ALGO_NAME}.txt'
 FIG_FILE = f'{ENV_NAME}_{ALGO_NAME}_reward.png'
-INFER_CKPT = 'InvertedPendulum-v5_PPO_episode_460_reward_956.pth'
+INFER_CKPT = 'InvertedPendulum-v5_PPO_episode_227_reward_953.pth'
 
 SEED = 1111
 
@@ -28,7 +28,7 @@ g_num_episodes = 1000
 g_PPO_epochs = 16
 g_discount_factor = 0.99
 g_gae_lambda = 0.95
-g_learning_rate = 5e-4
+g_learning_rate = 1e-3
 g_stop_reward = 950
 g_ppo_clip_epsilon = 0.2
 
@@ -191,12 +191,19 @@ class PPO:
         self.agent.train_mode()
         self.actor_optimizer = torch.optim.Adam(self.agent.actor.parameters(), lr=lr, eps=adam_eps)
         self.critic_optimizer = torch.optim.Adam(self.agent.critic.parameters(), lr=lr, eps=adam_eps)
+        self.critic_loss_f = nn.MSELoss()
         if self.lr_decay:
             # self.actor_scheduler = torch.optim.lr_scheduler.StepLR(self.actor_optimizer, step_size=10, gamma=0.9)
             # self.critic_scheduler = torch.optim.lr_scheduler.StepLR(self.critic_optimizer, step_size=10, gamma=0.9)
-            self.actor_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.actor_optimizer, gamma=0.99)
-            self.critic_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.critic_optimizer, gamma=0.99)
-        self.critic_loss_f = nn.MSELoss()
+            # self.actor_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.actor_optimizer, gamma=0.99)
+            # self.critic_scheduler = torch.optim.lr_scheduler.ExponentialLR(self.critic_optimizer, gamma=0.99)
+            def _lambda_lr(step):
+                if step <= 20:  # warmup
+                    return 0.05 * (1 + step)
+                else:
+                    return 0.99 ** (step - 20)
+            self.actor_scheduler = torch.optim.lr_scheduler.LambdaLR(self.actor_optimizer, _lambda_lr)
+            self.critic_scheduler = torch.optim.lr_scheduler.LambdaLR(self.critic_optimizer, _lambda_lr)
 
         self.memory = []
 
